@@ -37,6 +37,7 @@ We use a **two-stage verification strategy**:
 | `scripts/build_models.py` | Automated STL compilation pipeline | Python CLI | — |
 | `scripts/generate_3mf.py` | Automated PrusaSlicer 3MF project generator | Python CLI | — |
 | `scripts/verify_mesh.py` | Automated quality control & manifold verification | Python + Trimesh | — |
+| `templates/project-template/` | Reusable project scaffold for future 3D prints | Template | — |
 
 ---
 
@@ -145,3 +146,26 @@ python scripts/build_models.py
 python scripts/generate_3mf.py
 python scripts/verify_mesh.py
 ```
+
+---
+
+## Scaling to Future Projects (Repository Guide)
+
+This repository is designed to host your personal library of 3D printing projects.
+
+### Adding a New Print Project
+1. **Copy the template directory**:
+   ```bash
+   cp -r templates/project-template projects/my-new-print
+   ```
+2. **Design your part**:
+   - Edit `projects/my-new-print/model.scad` (or drop in your `.step` / `.f3d` CAD file).
+   - Export your `.stl` and configure your `.3mf` in PrusaSlicer.
+3. **Update project documentation**:
+   - Fill in the bill of materials, hardware screw sizes, and print settings in `projects/my-new-print/README.md`.
+4. **Commit & push to GitHub**:
+   ```bash
+   git add .
+   git commit -m "feat: add my-new-print"
+   git push origin main
+   ```
