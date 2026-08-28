@@ -1,0 +1,38 @@
+# ==========================================
+# 3D Printing & CAD Git Ignore Rules
+# ==========================================
+
+# Sliced Machine G-Code (Large binaries tied to specific firmware/nozzles)
+*.gcode
+*.gcode.gz
+*.bgcode
+
+# Slicer temporary & autosave files
+*.bak
+*.tmp
+*.autosave
+*~
+
+# Python Virtual Environments & Caches
+.venv/
+venv/
+ENV/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE & Editor specific caches
+.idea/
+.vscode/
+*.swp
+*.swo
