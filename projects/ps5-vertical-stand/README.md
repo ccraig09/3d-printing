@@ -23,15 +23,16 @@ record evidence
 only then design the production stand
 ```
 
-## Current printable artifact
+## Active files
 
 | File | Status | Purpose |
 | --- | --- | --- |
-| `ps5-fat-fit-test-v3.stl` | **PRINT THIS NEXT** | Small PETG mounting-interface gauge around the factory stand screw axis |
-| `ps5_stand.scad` | Source of truth | Parametric OpenSCAD source for the V3 gauge |
-| `scripts/build_models.py` | Active | Builds the V3 STL with OpenSCAD |
+| `ps5_stand.scad` | **Source of truth** | Parametric OpenSCAD source for the V3 calibration gauge |
+| `scripts/build_models.py` | Active | Generates `ps5-fat-fit-test-v3.stl` with OpenSCAD |
 | `scripts/verify_mesh.py` | Active | Checks mesh integrity and CAD intent only |
 | `tests/fit-log.md` | Active | Physical source of truth for prototype results |
+
+Generated STL/3MF files are not treated as design authority. Build the STL from the committed CAD source, and save slicer-specific `.3mf` projects from PrusaSlicer itself when exact printer settings matter.
 
 The old V1/V2/V2.1 STL and generated 3MF artifacts are intentionally removed from the active tree. Git history preserves them if they are ever needed for forensic comparison.
 
@@ -41,7 +42,7 @@ V3 deliberately **does not attempt to wrap the PS5 underside**.
 
 It uses:
 
-- 48 mm diameter calibration disk
+- 48 mm nominal calibration disk
 - 5 mm center sight / clearance bore
 - three 8 mm contact pads on a 30 mm pitch circle
 - 0.8 mm contact-pad height
@@ -62,7 +63,16 @@ Use these words consistently:
 
 Known high-confidence references for this project include the original PS5 overall dimensions, Sony's use of the factory stand mounting point, and the original stand screw's approximately 26.5 mm total length. The exact underside mating contour is **not** treated as verified.
 
-## Print the V3 fit test
+## Build the V3 fit test
+
+From this project directory:
+
+```bash
+python scripts/build_models.py
+python scripts/verify_mesh.py
+```
+
+This creates `ps5-fat-fit-test-v3.stl`.
 
 Use **PETG**. For the calibration coupon, durability matters more than cosmetics, but it is a low-load test piece.
 
@@ -74,8 +84,6 @@ Recommended starting point on the Prusa MK4S:
 - 15–20% gyroid infill
 - no supports
 - print flat
-
-Use PrusaSlicer directly. Save a native `.3mf` from PrusaSlicer only if you want to preserve your exact slicer profile. This repository no longer fabricates pseudo-Prusa 3MF projects in Python.
 
 ## Physical test procedure
 
@@ -96,14 +104,7 @@ Use PrusaSlicer directly. Save a native `.3mf` from PrusaSlicer only if you want
 
 A V3 pass does **not** mean the final stand is done. It means we have earned the right to design the next interface layer.
 
-## Build and verify
-
-From this project directory:
-
-```bash
-python scripts/build_models.py
-python scripts/verify_mesh.py
-```
+## What computational verification proves
 
 `verify_mesh.py` proves only:
 
