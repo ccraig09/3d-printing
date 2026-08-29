@@ -1,46 +1,51 @@
 # PS5 Vertical Stand — Physical Fit Log
 
-This file is the physical source of truth. Computational mesh checks are useful, but they cannot prove that a printed part fits the console.
+This file is the physical source of truth. Computational mesh checks do not prove console fit.
 
 ## Console
-
 - Target: Original / Fat PlayStation 5 Disc Edition, CFI-1000 family
 - User-confirmed hardware: original/fat Disc Edition
 
 ## Prototype history
 
 ### V1 — FAIL
-
-- Result: **Failed physical fit**
-- Evidence: user photos from 2026-08-28
-- Observed failure: the coupon/cradle geometry collided with or could not seat around the real console underside.
-- Root cause: CAD attempted to model a broad underside contour from dimensions that were not actually established from a verified dimensional drawing or physical measurement.
+- Failed physical fit.
+- Broad underside geometry was inferred rather than dimensionally established.
 
 ### V2 / V2.1 — NOT ACCEPTED AS VALIDATED
+- Automated QC proved mesh properties, not PS5 compatibility.
+- Prior production artifacts are not considered verified.
 
-- Result: **Not production-verified**
-- The source used inferred chassis geometry such as a nominal 50 mm × 98 mm locating region and 1.2 mm clearance.
-- Prior automated QC established mesh validity, not physical compatibility.
-- Do not treat prior STL/3MF artifacts as production-ready.
+### V3 — PHYSICALLY VERIFIED PASS
+- Date: 2026-08-29
+- Artifact: `ps5-fat-fit-test-v3.stl`
+- Geometry: 48 mm gauge, center bore, three 8 mm contact pads on 30 mm PCD, 0.8 mm pad height.
+- User result: **PASS — flat, no wobble, good seating.**
+- The exact V3 mounting-axis origin and three-pad contact geometry are now physically verified for reuse.
 
-### V3 — CURRENT FRONTIER
+### V4 — PRODUCTION CANDIDATE
+Status: **CAD/computational validation complete; final physical stand validation pending.**
 
-- Artifact generated from source: `ps5-fat-fit-test-v3.stl`
-- Purpose: test only the local mounting interface around the factory stand screw axis.
-- Geometry strategy: 48 mm calibration disk with a center sight bore and three 0.8 mm raised contact pads.
-- No production stand is generated yet.
+Shared body:
+- 160 mm footprint
+- 10 mm base thickness
+- exact V3 contact geometry reused
+- 5 mm center clearance bore
+- four optional rubber-foot recesses
+- no enclosing PS5 cradle walls
 
-#### V3 physical acceptance checklist
+Fastener variants:
+1. `ps5-fat-vertical-stand-oem.stl` — for original Sony captive stand screw or exact OEM-style replacement.
+2. `ps5-fat-vertical-stand-replacement.stl` — for an aftermarket captive replacement specifically sold for original PS5 CFI-1000/1100/1200 stands.
 
-Print in PETG, power off and unplug the PS5, then hold the coupon against the mounting area without forcing it.
+The two variants currently use the same conservative fastener envelope. iFixit verifies the original stand screw is 26.5 mm overall length, but this project does not claim a verified thread diameter/pitch. Measure the actual replacement before narrowing the parameterized bore/counterbore.
 
-- [ ] Center bore can be visually centered over the factory stand mounting insert.
-- [ ] None of the 48 mm outer disk touches a white side panel or vent feature.
-- [ ] All three raised contact pads touch the black structural surface at the same time.
-- [ ] Coupon does not visibly rock when lightly held in position.
-- [ ] Inspection windows show no hidden collision.
-- [ ] Photos captured from front, rear, and side for the next CAD iteration.
+#### V4 physical acceptance checklist
+- [ ] Console stands vertically without rocking.
+- [ ] All three V3-derived pads remain seated.
+- [ ] No contact with white panels or blocked vents.
+- [ ] Fastener engages smoothly without being forced.
+- [ ] Fastener clamps the stand before reaching its travel limit.
+- [ ] Photos captured for final validation record.
 
-#### If V3 fails
-
-Record which pad(s) touch, which do not, and where any collision occurs. Change one parameter at a time (`CONTACT_PCD`, `CONTACT_PAD_HEIGHT`, or `GAUGE_OUTER_DIAMETER`) rather than inventing a new full-console contour.
+Do not mark the project Production Verified until this checklist passes on the real console.
