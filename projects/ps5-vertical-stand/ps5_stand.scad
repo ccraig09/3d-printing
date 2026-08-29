@@ -1,7 +1,7 @@
 // =============================================================================
-// OpenSCAD Parametric Model: Original/Fat PS5 Disc Edition Vertical Stand (V2)
+// OpenSCAD Parametric Model: Original/Fat PS5 Disc Edition Vertical Stand (V2.1)
 // Target Console: PlayStation 5 Disc Edition (CFI-1000 Family, e.g. CFI-1015A)
-// Design Architecture: Open-Wing Anti-Twist Base (Zero White-Panel Collision)
+// Design Architecture: Open-Wing Anti-Twist Base (Engineered Zero-Collision)
 // Material: PETG | Print Orientation: Flat on bed | Supports: None Required
 // =============================================================================
 
@@ -9,18 +9,24 @@
 MODE = "STAND"; // [STAND, FIT_TEST, ALT_STAND]
 
 /* [Base Dimensions] */
-BASE_DIAMETER = 160.0; // [140:1:180] mm - Overall footprint diameter
-BASE_THICKNESS = 12.0;  // mm - Solid baseplate thickness
+BASE_DIAMETER = 160.0; // [140:1:180] mm - Overall footprint diameter (155mm Sony ref + 5mm margin)
+BASE_THICKNESS = 12.0;  // mm - Solid baseplate thickness for structural rigidity
 BASE_BOTTOM_CHAMFER = 2.0;
 BASE_TOP_CHAMFER = 2.0;
 
-/* [Central Seating & Locating Geometry] */
-CHASSIS_SPINE_WIDTH = 48.0;
-CHASSIS_SPINE_LENGTH = 96.0;
-LOCATING_LIP_HEIGHT = 5.0;
+/* [Central Seating & Anti-Twist Geometry] */
+// Width of the black chassis spine contact channel
+CHASSIS_SPINE_WIDTH = 50.0;
+// Front-to-back locating span
+CHASSIS_SPINE_LENGTH = 98.0;
+// Low-profile anti-twist locating lip height (prevents rotation without binding)
+LOCATING_LIP_HEIGHT = 4.5;
+// Locating lip wall thickness
 LOCATING_LIP_WALL = 3.5;
-LEAD_CHAMFER = 1.8;
-FIT_CLEARANCE = 0.8;
+// Generous 45-degree lead-in guide funnel
+LEAD_CHAMFER = 2.2;
+// Engineering fit clearance for PETG (forgiving slip-fit)
+FIT_CLEARANCE = 1.2;
 
 /* [Fastener Configuration] */
 FASTENER_TYPE = (MODE == "ALT_STAND") ? "M3" : "SONY";
@@ -39,7 +45,7 @@ FOOT_DEPTH = 1.2;
 FOOT_PCD = 118.0;
 
 /* [Fit Test Coupon Dimensions] */
-COUPON_WIDTH = 64.0;
+COUPON_WIDTH = 66.0;
 COUPON_BASE_THICKNESS = 4.0;
 
 /* [Mesh Resolution] */
@@ -50,7 +56,7 @@ $fn = $preview ? 64 : 128;
 module chassis_spine_profile(extra = 0) {
     w_half = (CHASSIS_SPINE_WIDTH / 2) + extra;
     len_half = (CHASSIS_SPINE_LENGTH / 2) + extra;
-    r_corner = 12.0;
+    r_corner = 14.0;
 
     hull() {
         translate([-w_half + r_corner, len_half - r_corner])
@@ -75,7 +81,7 @@ module chassis_cavity_cutter(z_base, h_lip, lead_chamfer, clr = FIT_CLEARANCE) {
             chassis_spine_profile(extra = clr);
         }
         
-        // Chamfered upper lead-in
+        // Generous chamfered upper lead-in funnel
         translate([0, 0, h_straight]) {
             hull() {
                 linear_extrude(height = 0.01) {
@@ -92,7 +98,7 @@ module chassis_cavity_cutter(z_base, h_lip, lead_chamfer, clr = FIT_CLEARANCE) {
 }
 
 
-// Solid Base Plate
+// Solid Base Plate with chamfers
 module base_plate() {
     difference() {
         cylinder(r = BASE_DIAMETER / 2, h = BASE_THICKNESS);
@@ -183,9 +189,9 @@ module production_vertical_stand() {
             clr = FIT_CLEARANCE
         );
 
-        // 2. Open side wings (100% white panel clearance)
+        // 2. Open side wings (100% white panel clearance across entire midsection)
         translate([0, 0, BASE_THICKNESS + LOCATING_LIP_HEIGHT / 2])
-            cube([BASE_DIAMETER * 1.5, CHASSIS_SPINE_LENGTH * 0.45, LOCATING_LIP_HEIGHT + 4.0], center = true);
+            cube([BASE_DIAMETER * 1.5, CHASSIS_SPINE_LENGTH * 0.48, LOCATING_LIP_HEIGHT + 4.0], center = true);
 
         // 3. Fastener through-hole
         fastener_cutout(BASE_THICKNESS, SCREW_COUNTERBORE_DEPTH);
@@ -196,7 +202,7 @@ module production_vertical_stand() {
 }
 
 
-// CALIBRATION COUPON (V2)
+// CALIBRATION COUPON (V2.1)
 module fit_test_coupon() {
     total_coupon_h = COUPON_BASE_THICKNESS + LOCATING_LIP_HEIGHT;
     
@@ -222,7 +228,7 @@ module fit_test_coupon() {
 
         // 2. Open side wings (100% clearance for white wings)
         translate([0, 0, COUPON_BASE_THICKNESS + LOCATING_LIP_HEIGHT / 2])
-            cube([COUPON_WIDTH * 2.0, CHASSIS_SPINE_LENGTH * 0.45, LOCATING_LIP_HEIGHT + 4.0], center = true);
+            cube([COUPON_WIDTH * 2.0, CHASSIS_SPINE_LENGTH * 0.48, LOCATING_LIP_HEIGHT + 4.0], center = true);
 
         // 3. Center screw through-hole & shallow test counterbore
         translate([SCREW_X, SCREW_Y, 0]) {
