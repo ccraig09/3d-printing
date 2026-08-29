@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
-"""
-Build script to compile OpenSCAD parametric model into production STLs.
-Generates:
-1. ps5-fat-fit-test.stl
-2. ps5-fat-vertical-stand.stl
-3. ps5-fat-vertical-stand-alt-fastener.stl
-"""
-
 import subprocess
 import sys
 import os
 import time
+import shutil
+
+OPENSCAD_BIN = shutil.which("openscad") or "/opt/homebrew/bin/openscad"
 
 def build_stl(mode: str, output_path: str, scad_file: str = "ps5_stand.scad"):
     print(f"==================================================")
@@ -18,9 +13,9 @@ def build_stl(mode: str, output_path: str, scad_file: str = "ps5_stand.scad"):
     print(f"==================================================")
     
     cmd = [
-        "openscad",
+        OPENSCAD_BIN,
         "-o", output_path,
-        "-D", f'MODE="{mode}"',
+        "-D", f"MODE=\"{mode}\"",
         scad_file
     ]
     
