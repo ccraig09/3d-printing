@@ -1,49 +1,70 @@
 # [Project Name]
 
-[Brief 1-2 sentence description of what this part is and what problem it solves.]
+[One or two sentences: what physical problem does this solve?]
 
----
+## Status
 
-## Hardware & Bill of Materials (BOM)
+**Prototype / Fit validation / Production-ready:** [choose one]
 
-| Item | Specification / Dimension | Quantity | Notes |
-| :--- | :--- | :--- | :--- |
-| **Fastener** | e.g. M3 × 12mm Button Head | 2 | Secures bracket to desk |
-| **Nut / Insert** | e.g. M3 Heat-set brass insert (OD 4.6mm, L 4.0mm) | 2 | Melted into printed boss |
-| **Padding** | e.g. 10mm adhesive rubber bumper | 4 | Anti-slip desk feet |
+A model is not “production-ready” simply because the STL is manifold or slices successfully.
 
----
+## Evidence & assumptions
 
-## 3D Print Settings (Recommended)
+Classify important dimensions:
 
-| Parameter | Recommended Setting | Rationale |
-| :--- | :--- | :--- |
-| **Printer** | Original Prusa MK4S (0.4mm nozzle) | — |
-| **Filament** | PETG / PLA / ASA | [Explain material choice based on mechanical / thermal stress] |
-| **Layer Height** | `0.20mm STRUCTURAL` | Balanced strength and surface finish |
-| **Perimeters (Walls)**| 4 walls | Provides solid mechanical core |
-| **Top / Bottom** | 5 top / 5 bottom | Prevents top layer pillowing / bottom flex |
-| **Infill** | 20% Gyroid | Isotropic rigidity |
-| **Supports** | None (or specify custom enforcers) | Chamfers allow support-free printing |
+| Parameter | Value | Confidence | Source / reason |
+| --- | ---: | --- | --- |
+| `EXAMPLE_WIDTH` | 50.0 mm | INFERRED | Needs first physical fit test |
 
----
+Use:
 
-## Files in this Project
+- **VERIFIED** — manufacturer/primary dimensional source
+- **REFERENCE** — working community/reference model or teardown evidence
+- **INFERRED** — engineering estimate awaiting physical test
+- **PHYSICALLY VERIFIED** — tested on the real target and logged
 
-| File | Type | Description |
-| :--- | :--- | :--- |
-| `model.scad` | CAD Source | Fully parametric OpenSCAD design |
-| `output.stl` | STL Mesh | Universal 3D geometry |
-| `output.3mf` | Slicer Project | Pre-configured plate layout & settings |
+## Hardware / BOM
 
----
+| Item | Specification | Qty | Notes |
+| --- | --- | ---: | --- |
+| Fastener | TBD | 1 | Do not guess thread specs on valuable hardware |
 
-## Parametric Customization Guide
+## Current calibration question
 
-If adjusting dimensions in `model.scad`:
+> What is the smallest physical question this print needs to answer?
 
-| Variable Name | Default | Description |
-| :--- | :--- | :--- |
-| `WIDTH` | `50.0` | Total part width in mm |
-| `CLEARANCE` | `0.4` | Fit tolerance gap |
-| `SCREW_HOLE_DIA` | `3.6` | Clearance hole for M3 screws |
+[Write it here before creating a large production print.]
+
+## Print settings
+
+| Parameter | Starting point |
+| --- | --- |
+| Printer | Original Prusa MK4S |
+| Material | PETG / PLA / ASA |
+| Layer height | 0.20 mm |
+| Perimeters | 3–4 |
+| Infill | 15–20% gyroid |
+| Supports | Prefer none |
+
+## Files
+
+| File | Role |
+| --- | --- |
+| `model.scad` | Parametric CAD source |
+| `fit-test.stl` | Current calibration export |
+| `tests/fit-log.md` | Physical validation history |
+
+Save slicer-specific `.3mf` projects from PrusaSlicer itself when exact printer/filament settings matter.
+
+## Build / computational QC
+
+Document the commands that build and inspect the model. Clearly state what those checks **do not** prove.
+
+## Physical acceptance criteria
+
+- [ ] [observable fit criterion]
+- [ ] [clearance criterion]
+- [ ] [alignment criterion]
+- [ ] photos captured
+
+Record the result in `tests/fit-log.md` before changing several dimensions at once.
