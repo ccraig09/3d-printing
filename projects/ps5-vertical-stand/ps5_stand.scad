@@ -1,83 +1,107 @@
 // =============================================================================
-// PS5 Fat Disc Edition Vertical Stand — Recovery V3
+// PS5 Fat Disc Edition Vertical Stand — V4 Production Candidate
 // Target: Original/Fat PS5 Disc Edition, CFI-1000 family
-// Status: CALIBRATION-FIRST. Production stand intentionally blocked until fit test.
+// Basis: V3 local mounting interface PHYSICALLY PASSED by user on 2026-08-29.
 // Material: PETG
 // =============================================================================
 
 /* [Render Selection] */
-MODE = "FIT_TEST"; // [FIT_TEST, INTERFACE_GAUGE]
+MODE = "OEM_STAND"; // [FIT_TEST, OEM_STAND, REPLACEMENT_STAND]
 
-/* [Verified external reference] */
-SONY_REFERENCE_FOOTPRINT = 155.0; // mm — reference only, not used by coupon
+/* [External reference / classification] */
+SONY_REFERENCE_FOOTPRINT = 155.0; // VERIFIED reference from Sony CFI-ZVS1 docs
+BASE_DIAMETER = 160.0;            // INFERRED: +5 mm over Sony reference
+BASE_THICKNESS = 10.0;            // INFERRED: structural base while preserving fastener reach
+EDGE_CHAMFER = 1.2;               // INFERRED print/handling chamfer
 
-/* [V3 mounting-interface gauge] */
-// The V3 coupon deliberately avoids pretending we know the PS5 underside contour.
-// It tests only the region around the factory stand mounting point.
-GAUGE_OUTER_DIAMETER = 48.0;       // INFERRED: intentionally compact
-GAUGE_THICKNESS = 4.0;             // INFERRED: stiff enough for handling
-CENTER_BORE_DIAMETER = 5.0;        // INFERRED clearance-only sight bore; no thread claim
-COUNTERBORE_DIAMETER = 16.0;       // REFERENCE envelope for stand-screw head clearance
-COUNTERBORE_DEPTH = 2.0;           // INFERRED; visual/fit test only
+/* [Physically verified V3 interface — DO NOT CHANGE without new fit test] */
+V3_GAUGE_OUTER_DIAMETER = 48.0;
+CONTACT_PCD = 30.0;
+CONTACT_PAD_DIAMETER = 8.0;
+CONTACT_PAD_HEIGHT = 0.8;
+CENTER_BORE_DIAMETER = 5.0;        // clearance/sight bore only; no thread claim
 
-// Three raised contact pads create a deterministic tripod instead of a guessed full contour.
-// If all three touch, the local mounting region is sufficiently planar for a later interface.
-CONTACT_PCD = 30.0;                 // INFERRED pitch circle diameter
-CONTACT_PAD_DIAMETER = 8.0;        // INFERRED
-CONTACT_PAD_HEIGHT = 0.8;           // INFERRED; easy to revise from physical evidence
+/* [Fastener seat] */
+// iFixit verifies only the original captive stand screw's total length (26.5 mm).
+// Thread diameter/pitch is intentionally NOT encoded as a claim here.
+// ZedLabz describes its aftermarket captive replacement as matching the original
+// PS5 stand screw for CFI-1000/1100/1200, so both variants currently share this
+// conservative envelope. Measure a purchased screw before narrowing these values.
+OEM_COUNTERBORE_DIAMETER = 16.0;
+OEM_COUNTERBORE_DEPTH = 4.0;
+REPLACEMENT_COUNTERBORE_DIAMETER = 16.0;
+REPLACEMENT_COUNTERBORE_DEPTH = 4.0;
 
-// Windows make it easy to inspect whether the gauge is touching nearby PS5 plastic.
-WINDOW_WIDTH = 10.0;
-WINDOW_LENGTH = 13.0;
+/* [Feet] */
+FOOT_DIAMETER = 11.0;
+FOOT_DEPTH = 1.0;
+FOOT_PCD = 124.0;
 
-/* [Mesh Resolution] */
-// Low facet count is intentional: this is a disposable calibration gauge, not a cosmetic part.
-$fn = 32;
+/* [Mesh] */
+$fn = $preview ? 64 : 160;
 
-module rounded_window() {
-    hull() {
-        translate([0, -(WINDOW_LENGTH-WINDOW_WIDTH)/2]) circle(d=WINDOW_WIDTH);
-        translate([0,  (WINDOW_LENGTH-WINDOW_WIDTH)/2]) circle(d=WINDOW_WIDTH);
+module v3_contact_pads(z0) {
+    for (a = [90, 210, 330]) {
+        rotate([0,0,a])
+            translate([CONTACT_PCD/2, 0, z0])
+                cylinder(d=CONTACT_PAD_DIAMETER, h=CONTACT_PAD_HEIGHT);
+    }
+}
+
+module base_solid() {
+    union() {
+        cylinder(d=BASE_DIAMETER - 2*EDGE_CHAMFER, h=BASE_THICKNESS);
+        cylinder(d1=BASE_DIAMETER, d2=BASE_DIAMETER - 2*EDGE_CHAMFER,
+                 h=EDGE_CHAMFER);
+    }
+}
+
+module foot_recesses() {
+    for (a = [45,135,225,315]) {
+        rotate([0,0,a])
+            translate([FOOT_PCD/2,0,-0.01])
+                cylinder(d=FOOT_DIAMETER, h=FOOT_DEPTH+0.02);
+    }
+}
+
+module fastener_cut(counterbore_d, counterbore_depth) {
+    translate([0,0,-1])
+        cylinder(d=CENTER_BORE_DIAMETER, h=BASE_THICKNESS+CONTACT_PAD_HEIGHT+2);
+    translate([0,0,-0.01])
+        cylinder(d=counterbore_d, h=counterbore_depth+0.01);
+}
+
+module production_stand(counterbore_d, counterbore_depth) {
+    difference() {
+        union() {
+            base_solid();
+            v3_contact_pads(BASE_THICKNESS);
+        }
+        fastener_cut(counterbore_d, counterbore_depth);
+        foot_recesses();
     }
 }
 
 module v3_fit_test() {
+    GAUGE_THICKNESS = 4.0;
     difference() {
         union() {
-            // Main flat calibration disk.
-            cylinder(d=GAUGE_OUTER_DIAMETER, h=GAUGE_THICKNESS);
-
-            // Three tiny raised pads: minimum-contact tripod.
-            for (a = [90, 210, 330]) {
-                rotate([0,0,a])
-                    translate([CONTACT_PCD/2, 0, GAUGE_THICKNESS])
-                        cylinder(d=CONTACT_PAD_DIAMETER, h=CONTACT_PAD_HEIGHT);
-            }
+            cylinder(d=V3_GAUGE_OUTER_DIAMETER, h=GAUGE_THICKNESS);
+            v3_contact_pads(GAUGE_THICKNESS);
         }
-
-        // Deliberately oversized sight/clearance bore around factory mounting axis.
         translate([0,0,-1])
             cylinder(d=CENTER_BORE_DIAMETER, h=GAUGE_THICKNESS+CONTACT_PAD_HEIGHT+2);
-
-        // Shallow underside counterbore so a screw head can be checked later without
-        // claiming this coupon is a structural fastener seat.
         translate([0,0,-0.01])
-            cylinder(d=COUNTERBORE_DIAMETER, h=COUNTERBORE_DEPTH+0.01);
-
-        // Three inspection windows between the contact pads.
-        for (a = [30, 150, 270]) {
-            rotate([0,0,a])
-                translate([GAUGE_OUTER_DIAMETER*0.28,0,-1])
-                    linear_extrude(height=GAUGE_THICKNESS+2)
-                        rounded_window();
-        }
+            cylinder(d=16.0, h=2.01);
     }
 }
 
-// INTERFACE_GAUGE is currently identical to FIT_TEST so the source has an explicit
-// semantic name for future evolution without inventing a production stand early.
-if (MODE == "FIT_TEST" || MODE == "INTERFACE_GAUGE") {
+if (MODE == "FIT_TEST") {
     v3_fit_test();
+} else if (MODE == "OEM_STAND") {
+    production_stand(OEM_COUNTERBORE_DIAMETER, OEM_COUNTERBORE_DEPTH);
+} else if (MODE == "REPLACEMENT_STAND") {
+    production_stand(REPLACEMENT_COUNTERBORE_DIAMETER, REPLACEMENT_COUNTERBORE_DEPTH);
 } else {
-    assert(false, "Recovery V3 intentionally has no production STAND mode until the physical fit test passes.");
+    assert(false, "Unknown MODE");
 }
