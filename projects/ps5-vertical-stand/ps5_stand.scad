@@ -31,7 +31,8 @@ WINDOW_WIDTH = 10.0;
 WINDOW_LENGTH = 13.0;
 
 /* [Mesh Resolution] */
-$fn = $preview ? 48 : 72;
+// Low facet count is intentional: this is a disposable calibration gauge, not a cosmetic part.
+$fn = 32;
 
 module rounded_window() {
     hull() {
