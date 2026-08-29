@@ -31,7 +31,7 @@ WINDOW_WIDTH = 10.0;
 WINDOW_LENGTH = 13.0;
 
 /* [Mesh Resolution] */
-$fn = $preview ? 72 : 144;
+$fn = $preview ? 48 : 72;
 
 module rounded_window() {
     hull() {
