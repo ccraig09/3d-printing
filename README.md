@@ -52,7 +52,6 @@ final physical validation
 │   └── ps5-vertical-stand/
 │       ├── README.md
 │       ├── ps5_stand.scad
-│       ├── ps5-fat-fit-test-v3.stl
 │       ├── scripts/
 │       │   ├── build_models.py
 │       │   └── verify_mesh.py
@@ -65,6 +64,8 @@ final physical validation
         └── tests/
             └── fit-log.md
 ```
+
+Generated STLs are outputs of the committed CAD source rather than the source of design truth. Slicer-specific `.3mf` projects should be saved from PrusaSlicer itself when exact printer/filament settings matter.
 
 As projects grow, `cad/`, `exports/`, and `slicer/` subfolders can be introduced when they reduce clutter. Do not add folder ceremony before a project earns it.
 
@@ -81,4 +82,4 @@ Then:
 3. Build the smallest calibration artifact that can answer the current physical question.
 4. Record every physical attempt in `tests/fit-log.md`.
 5. Promote an export to “production-ready” only after physical validation.
-6. Save `.3mf` projects from PrusaSlicer itself when exact printer/filament settings matter.
+6. Save `.3mf` projects from PrusaSlicer itself when exact slicer settings matter.
