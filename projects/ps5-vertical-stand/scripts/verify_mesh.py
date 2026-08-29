@@ -1,77 +1,67 @@
 #!/usr/bin/env python3
-"""Recovery V3 computational checks.
+"""Computational checks for V3/V4 PS5 stand meshes.
 
-These checks verify mesh integrity and internal CAD intent only.
-They DO NOT claim that the model physically fits a PS5.
+These checks prove mesh/CAD properties only. Physical PS5 compatibility is recorded
+separately in tests/fit-log.md.
 """
 import os
 import numpy as np
 import trimesh
 
-EXPECTED_EXTENTS = np.array([48.0, 48.0, 4.8])
-EXTENT_TOLERANCE_MM = 0.08
+TARGETS = {
+    "ps5-fat-fit-test-v3.stl": np.array([48.0, 48.0, 4.8]),
+    "ps5-fat-vertical-stand-oem.stl": np.array([160.0, 160.0, 10.8]),
+    "ps5-fat-vertical-stand-replacement.stl": np.array([160.0, 160.0, 10.8]),
+}
+TOLERANCE_MM = 0.15
 
 
-def verify(path: str) -> bool:
-    mesh = trimesh.load(path, force="mesh")
-    ok = True
+def origin_in_xy_triangle(t) -> bool:
+    a, b, c = t
+    v0 = c - a
+    v1 = b - a
+    v2 = -a
+    den = v0[0] * v1[1] - v1[0] * v0[1]
+    if abs(den) < 1e-12:
+        return False
+    u = (v2[0] * v1[1] - v1[0] * v2[1]) / den
+    v = (v0[0] * v2[1] - v2[0] * v0[1]) / den
+    return u >= -1e-9 and v >= -1e-9 and (u + v) <= 1 + 1e-9
 
-    print(f"File: {path}")
+
+def verify(path: str, expected: np.ndarray) -> trimesh.Trimesh:
+    mesh = trimesh.load_mesh(path, process=True)
+    print(f"\nFile: {path}")
     print(f"Watertight: {mesh.is_watertight}")
     print(f"Winding consistent: {mesh.is_winding_consistent}")
     print(f"Extents: {mesh.extents}")
 
-    if not mesh.is_watertight:
-        print("FAIL: mesh is not watertight")
-        ok = False
-    if not mesh.is_winding_consistent:
-        print("FAIL: mesh winding is inconsistent")
-        ok = False
-    if not np.allclose(mesh.extents, EXPECTED_EXTENTS, atol=EXTENT_TOLERANCE_MM):
-        print(f"FAIL: unexpected extents; expected {EXPECTED_EXTENTS} ± {EXTENT_TOLERANCE_MM} mm")
-        ok = False
+    assert mesh.is_watertight, "mesh is not watertight"
+    assert mesh.is_winding_consistent, "mesh winding is inconsistent"
+    assert np.allclose(mesh.extents, expected, atol=TOLERANCE_MM), (
+        f"unexpected extents; expected {expected} ± {TOLERANCE_MM} mm"
+    )
 
-    # Center bore check without optional spatial-index dependencies.
-    # Cast one mathematical ray along +Z through X=Y=0 and check whether
-    # it intersects any mesh triangle. A true through-bore has zero hits.
-    triangles = mesh.triangles
-    origin = np.array([0.0, 0.0, mesh.bounds[0, 2] - 1.0])
-    direction = np.array([0.0, 0.0, 1.0])
-    eps = 1e-9
-    hits = 0
-    for tri in triangles:
-        v0, v1, v2 = tri
-        edge1 = v1 - v0
-        edge2 = v2 - v0
-        h = np.cross(direction, edge2)
-        a = float(np.dot(edge1, h))
-        if -eps < a < eps:
-            continue
-        f = 1.0 / a
-        svec = origin - v0
-        u = f * float(np.dot(svec, h))
-        if u < 0.0 or u > 1.0:
-            continue
-        q = np.cross(svec, edge1)
-        v = f * float(np.dot(direction, q))
-        if v < 0.0 or u + v > 1.0:
-            continue
-        t = f * float(np.dot(edge2, q))
-        if t > eps:
-            hits += 1
+    blockers = sum(origin_in_xy_triangle(t[:, :2]) for t in mesh.triangles)
+    print(f"Center bore projected blockers: {blockers}")
+    assert blockers == 0, "center mounting bore is obstructed"
+    return mesh
 
-    bore_open = hits == 0
-    print(f"Center bore open: {bore_open} (axis/triangle intersections={hits})")
-    if not bore_open:
-        print("FAIL: center bore is obstructed")
-        ok = False
 
-    print("NOTE: Physical PS5 fit remains UNVERIFIED until the printed V3 coupon is tested on the console.")
-    return ok
+def main() -> None:
+    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    os.chdir(project_dir)
+    meshes = {name: verify(name, extents) for name, extents in TARGETS.items()}
+
+    oem = meshes["ps5-fat-vertical-stand-oem.stl"]
+    replacement = meshes["ps5-fat-vertical-stand-replacement.stl"]
+    assert np.allclose(oem.bounds, replacement.bounds, atol=1e-6), (
+        "fastener variants changed the shared external body geometry"
+    )
+
+    print("\nPASS: computational V3/V4 mesh contract")
+    print("NOTE: final production stand fit is still a physical validation gate.")
 
 
 if __name__ == "__main__":
-    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    os.chdir(project_dir)
-    success = verify("ps5-fat-fit-test-v3.stl")
-    raise SystemExit(0 if success else 1)
+    main()

@@ -15,7 +15,7 @@ The repo is intentionally organized as a **maker engineering notebook**, not jus
 
 | # | Project | Category | Material | Status |
 | :-: | --- | --- | --- | --- |
-| **01** | [PS5 Fat Vertical Stand](./projects/ps5-vertical-stand) | Gaming / Stand | PETG | 🧪 **Recovery V3 — fit validation** |
+| **01** | [PS5 Fat Vertical Stand](./projects/ps5-vertical-stand) | Gaming / Stand | PETG | 🛠️ **V4 production candidate — physical validation pending** |
 | -- | More projects coming | — | — | ⏳ |
 
 ## Standard project lifecycle
@@ -56,7 +56,8 @@ final physical validation
 │       │   ├── build_models.py
 │       │   └── verify_mesh.py
 │       └── tests/
-│           └── fit-log.md
+│           ├── fit-log.md
+│           └── production-stand-contract.md
 └── templates/
     └── project-template/
         ├── README.md

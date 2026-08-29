@@ -1,130 +1,113 @@
 # Original / Fat PlayStation 5 Disc Edition Vertical Stand
 
-Recovery project for a 3D-printable vertical stand for the **original / fat PlayStation 5 Disc Edition (CFI-1000 family)**.
+Parametric PETG stand project for the **original / fat PS5 Disc Edition (CFI-1000 family)**.
 
-> **Current status: 🧪 Physical fit validation / Recovery V3**  
-> The prior V1/V2 cradle geometry failed physical fit or was never physically validated. The project is intentionally back at the calibration stage. **There is no production-ready stand STL in V3 yet.**
+> **Current status: 🛠️ V4 Production Candidate — physical stand validation pending**  
+> The V3 local mounting-interface gauge physically passed on the real console on 2026-08-29: flat, no wobble, good seating. V4 reuses that exact contact geometry and expands it into a full 160 mm stand.
 
-## Why V3 exists
+## Why this version is different
 
-The earlier design made a classic CAD mistake: it converted uncertain underside geometry into precise-looking dimensions, then used mesh checks as if they proved console compatibility. A watertight STL can still be the wrong shape.
-
-Recovery V3 changes the contract:
+Earlier versions guessed a broad PS5 underside contour. V4 does not. It keeps the only geometry we have physically proven: the center mounting axis and the three V3 contact pads.
 
 ```text
-research / evidence
+V3 physical PASS
       ↓
-small calibration interface
+freeze proven contact geometry
       ↓
-physical fit test on the real PS5
+add 160 mm structural base
       ↓
-record evidence
+parameterized fastener seat
       ↓
-only then design the production stand
+V4 production candidate
+      ↓
+final physical stand test
 ```
 
 ## Active files
 
-| File | Status | Purpose |
-| --- | --- | --- |
-| `ps5_stand.scad` | **Source of truth** | Parametric OpenSCAD source for the V3 calibration gauge |
-| `scripts/build_models.py` | Active | Generates `ps5-fat-fit-test-v3.stl` with OpenSCAD |
-| `scripts/verify_mesh.py` | Active | Checks mesh integrity and CAD intent only |
-| `tests/fit-log.md` | Active | Physical source of truth for prototype results |
+| File | Purpose |
+| --- | --- |
+| `ps5_stand.scad` | Parametric source of truth for V3 gauge + V4 stands |
+| `scripts/build_models.py` | Builds V3 gauge and both V4 STL candidates |
+| `scripts/verify_mesh.py` | Verifies mesh/CAD properties only |
+| `tests/fit-log.md` | Physical source of truth |
+| `tests/production-stand-contract.md` | V4 requirements written before implementation |
 
-Generated STL/3MF files are not treated as design authority. Build the STL from the committed CAD source, and save slicer-specific `.3mf` projects from PrusaSlicer itself when exact printer settings matter.
+## V4 geometry
 
-The old V1/V2/V2.1 STL and generated 3MF artifacts are intentionally removed from the active tree. Git history preserves them if they are ever needed for forensic comparison.
+Shared body:
 
-## V3 calibration geometry
+- 160 mm base diameter
+- 10 mm base thickness
+- small printable edge chamfer
+- exact V3 contact pattern: three 8 mm pads on a 30 mm pitch circle, 0.8 mm high
+- 5 mm center clearance bore
+- four optional 11 mm × 1 mm rubber-foot recesses
+- no guessed enclosing cradle walls
 
-V3 deliberately **does not attempt to wrap the PS5 underside**.
+The original Sony stand footprint is used only as a reference for scale; the production candidate is intentionally 5 mm larger.
 
-It uses:
+## Fastener strategy
 
-- 48 mm nominal calibration disk
-- 5 mm center sight / clearance bore
-- three 8 mm contact pads on a 30 mm pitch circle
-- 0.8 mm contact-pad height
-- three inspection windows
+### OEM variant
 
-The three contact pads form a tripod. That gives us a simple physical question: **does the local black mounting region around the factory screw point support three contacts without rocking or colliding with nearby plastic?**
+`ps5-fat-vertical-stand-oem.stl`
 
-Every V3 dimension above is **INFERRED** and exists to create a cheap experiment, not to claim Sony geometry.
+Designed around the original captive PS5 stand-screw style. iFixit verifies the original stand screw is **26.5 mm overall length**. This project does **not** claim a verified thread diameter or pitch.
 
-## Evidence classification
+### Replacement variant
 
-Use these words consistently:
+`ps5-fat-vertical-stand-replacement.stl`
 
-- **VERIFIED** — directly supported by a manufacturer or primary dimensional source.
-- **REFERENCE** — supported by a working/community design or teardown observation, but not a formal Sony dimension.
-- **INFERRED** — engineering estimate that must be physically tested.
-- **PHYSICALLY VERIFIED** — tested on the actual target console and recorded in `tests/fit-log.md`.
+Designed for a purpose-made captive replacement sold for original PS5 CFI-1000/1100/1200 stands. ZedLabz describes its replacement as matching the original Sony captive screw, but does not publish enough dimensional data to justify a different printed seat.
 
-Known high-confidence references for this project include the original PS5 overall dimensions, Sony's use of the factory stand mounting point, and the original stand screw's approximately 26.5 mm total length. The exact underside mating contour is **not** treated as verified.
+Therefore the OEM and replacement candidates currently share the same conservative 5 mm through-bore and 16 mm × 4 mm underside counterbore. The parameters are separate in CAD so they can diverge after the actual replacement screw is measured.
 
-## Build the V3 fit test
+**Do not substitute a random M3/M4 screw into the console based only on internet claims.**
 
-From this project directory:
+## Build and verify
 
 ```bash
 python scripts/build_models.py
 python scripts/verify_mesh.py
 ```
 
-This creates `ps5-fat-fit-test-v3.stl`.
+Expected outputs:
 
-Use **PETG**. For the calibration coupon, durability matters more than cosmetics, but it is a low-load test piece.
+- `ps5-fat-fit-test-v3.stl`
+- `ps5-fat-vertical-stand-oem.stl`
+- `ps5-fat-vertical-stand-replacement.stl`
 
-Recommended starting point on the Prusa MK4S:
+Computational checks verify watertightness, winding, expected dimensions, an open center bore, and that the two fastener variants preserve the same external stand body. They do not prove final PS5 fit.
 
+## Recommended Prusa MK4S starting settings
+
+For the full V4 stand:
+
+- PETG
 - 0.20 mm layer height
-- 3–4 perimeters
-- 4 top / 4 bottom layers
-- 15–20% gyroid infill
+- 4 perimeters
+- 5 top / 5 bottom layers
+- 20% gyroid infill
 - no supports
-- print flat
+- print flat on the base
 
-## Physical test procedure
+## Physical validation gate
 
-1. Power off and unplug the PS5.
-2. Remove the factory stand screw-hole cap if present.
-3. **Do not force a screw into the console.** The V3 coupon can be tested by hand first.
-4. Place the three raised contact pads against the black structural area around the mounting point.
-5. Center the printed sight bore over the factory mounting insert.
-6. Check the acceptance list in `tests/fit-log.md`.
-7. Take clear front/rear/side photos before changing CAD.
+V3 has passed. V4 has not yet been physically proven as a complete stand.
 
-### Pass means
+Before marking this project Production Verified, check `tests/fit-log.md` and confirm:
 
-- no white-panel or vent collision
-- all three contact pads touch
-- no obvious rocking while lightly held
-- center sight bore can align with the factory mounting point
+- console stands without rocking
+- all three V3-derived pads remain seated
+- no white-panel or vent interference
+- the chosen PS5-compatible fastener engages smoothly and clamps correctly
 
-A V3 pass does **not** mean the final stand is done. It means we have earned the right to design the next interface layer.
+## Evidence language
 
-## What computational verification proves
+- **VERIFIED** — manufacturer/primary dimensional evidence
+- **REFERENCE** — credible teardown/community/vendor evidence
+- **INFERRED** — engineering estimate
+- **PHYSICALLY VERIFIED** — tested on the actual target console and recorded in the fit log
 
-`verify_mesh.py` proves only:
-
-- STL is watertight
-- triangle winding is consistent
-- expected V3 bounding dimensions are present
-- the center bore is geometrically open
-
-It explicitly does **not** claim physical PS5 fit.
-
-## Production stand gate
-
-A production stand should not be generated until the V3 physical checklist is recorded as passing or the failure evidence gives us the next measured correction.
-
-When that gate is crossed, the production stand can reintroduce:
-
-- ~155–165 mm stability footprint
-- structural fastener seat
-- anti-rotation features
-- rubber-foot recesses
-- airflow clearance
-
-Those features will be built around **physically established interface geometry**, not guessed full-console contours.
+Generated STL files are build outputs. The committed OpenSCAD file remains the design source of truth. Save `.3mf` projects from PrusaSlicer itself when exact printer/filament settings matter.
